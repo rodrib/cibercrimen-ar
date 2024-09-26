@@ -120,3 +120,19 @@ if len(dfDatos.dropna()) > 0:
             """
             # Mostramos los detalles del evento seleccionado
             st.write(detalleEvento,unsafe_allow_html=True)
+
+
+    ##### testando con el df
+
+    # Cargar el archivo CSV en un DataFrame
+df = pd.read_csv('cibercrimen-ar.csv')
+
+
+#Convertir la columna 'Fechas' a datetime
+df['Fechas'] = pd.to_datetime(df['Fechas'], errors='coerce', dayfirst=True)
+
+# Extraer año y mes de la columna 'Fechas'
+df['Año'] = df['Fechas'].dt.year
+df['Mes'] = df['Fechas'].dt.month
+
+st.dataframe(df)

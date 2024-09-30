@@ -1,21 +1,33 @@
 import streamlit as st
 import pandas as pd
-
-# pip install streamlit-vis-timeline
-from streamlit_timeline import st_timeline # https://github.com/giswqs/streamlit-timeline?tab=readme-ov-file
-from datetime import date, timedelta
-
+from streamlit_timeline import st_timeline
+from datetime import timedelta
 
 # Cargar el archivo CSV directamente
 csv_file_path = "cibercrimen-ar.csv"
 df = pd.read_csv(csv_file_path)
 
-# Adaptar el DataFrame, solo usando la columna 'Evento'
+# Verificar si existe una columna 'Año' o 'Fecha'
+if 'Año' in df.columns:
+    # Si el archivo tiene una columna de años
+    df['start'] = pd.to_datetime(df['Año'], format='%Y', errors='coerce')
+    df['end'] = df['start']  # Usamos el mismo año como fecha de inicio y fin
+else:
+    # Si hay una columna 'Fecha', usaremos esa
+    df['start'] = pd.to_datetime(df['Fecha'], errors='coerce')
+    df['end'] = df['start']
+
+# Reemplazar NaT (valores inválidos o faltantes de fechas) por una fecha predeterminada
+fecha_default = pd.to_datetime('2000-01-01')  # Puedes cambiar esta fecha por otra si lo prefieres
+df['start'] = df['start'].fillna(fecha_default)
+df['end'] = df['end'].fillna(fecha_default)
+
+# Adaptar el DataFrame, usando las columnas 'Evento' y 'Descripcion'
 dfDatos = pd.DataFrame({
-    "start": pd.to_datetime('today'),  # Usar la fecha actual como valor por defecto
-    "end": pd.to_datetime('today'),  # Mismo valor para 'start' y 'end'
+    "start": df['start'],  # Usar la columna de fechas ajustada
+    "end": df['end'],  # Usar la misma fecha para 'end'
     "title": df['Evento'],  # Usar la columna 'Evento' como título
-    "content": df['Descripcion'],  # Usar la columna 'Evento' también como contenido
+    "content": df['Descripcion'],  # Usar la columna 'Descripcion' como contenido
     "color": None,
     "textcolor": None,
     "type": 'box'
